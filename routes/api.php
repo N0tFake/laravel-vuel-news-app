@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\api\v1\UserController;
+use App\Http\Controllers\api\v1\NewsController;
 
 /*
 |--------------------------------------------------------------------------
@@ -25,4 +26,5 @@ Route::prefix('v1')->group(function () {
     });
 
     Route::resource('/users', UserController::class)->except(['create', 'edit']);
+    Route::resource('/news', NewsController::class)->except(['create', 'edit']);
 });

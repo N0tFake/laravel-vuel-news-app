@@ -5,7 +5,6 @@ namespace App\Http\Controllers\api\v1;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\User;
-use App\Http\Requests\CreateOrUptadeUserRequest;
 
 class UserController extends Controller
 {
@@ -25,9 +24,16 @@ class UserController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(CreateOrUptadeUserRequest $request)
+    public function store(Request $request)
     {
         try {
+
+            $request->validate([
+                'name' => 'required',
+                'email' => 'required|email|unique:users',
+                'password' => 'required|min:6'
+            ]);
+
             $users = User::create([
                 'name' => $request->name,
                 'email' => $request->email,

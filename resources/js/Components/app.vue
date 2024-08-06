@@ -1,5 +1,5 @@
 <template>
   <h1>
-    Hello World!!
+    app
   </h1>
 </template>
