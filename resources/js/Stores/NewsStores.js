@@ -83,7 +83,6 @@ export const useNewsStore = defineStore('news', {
       try {
         await axios.delete(`/news/${id}`);
         this.getNews();
-        useToast().success('Notícia deletada com sucesso!');
       } catch (error) {
         this.error = error;
       }
