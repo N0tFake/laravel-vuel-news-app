@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
 use App\Models\News;
+use Carbon\Carbon;
 
 class NewsController extends Controller
 {
@@ -17,7 +18,14 @@ class NewsController extends Controller
     {
 
         try {
-            $news = News::all();
+            $news = News::orderBy('created_at', 'desc')->get()->map(function($item) {
+                if ($item->image) {
+                    $item->image = Storage::url($item->image);
+                }
+                
+                return $item;
+            });
+        
             return response()->json(['news' => $news], 200);
         } catch (\Exception $e) {
             return response()->json(['Error' => true, 'message' => $e->getMessage()]);
