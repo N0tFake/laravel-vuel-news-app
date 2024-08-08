@@ -35,12 +35,15 @@ import { storeToRefs } from 'pinia';
 import { useNewsStore } from '../Stores/NewsStores';
 import EditNewsModal from './News/EditNewsModal.vue';
 import { formatDistanceToNow, parseISO } from 'date-fns';
+import { useToast } from 'vue-toast-notification';
 
 const { news, loading, error } = storeToRefs(useNewsStore());
 const newsStore = useNewsStore();
 
 const isEditing = ref(false);
 const selectNewsItem = ref(null);
+
+const toast = useToast();
 
 // Get News
 onMounted(() => newsStore.getNews());
@@ -65,7 +68,8 @@ const updateNews = async (newsData) => {
 
 const deletePost = async (id) => {
   console.log(`Delete post with id: ${id}`);
-  await newsStore.deleteNews(id);
+  const isDelete = await newsStore.deleteNews(id);
+  toast.success('Notícia deletada com sucesso!') ? isDelete : toast.error('Erro ao deletar notícia!');
   // Adicionar as notificacoes com o useToast().success('Notícia deletada com sucesso!');
 }
 
