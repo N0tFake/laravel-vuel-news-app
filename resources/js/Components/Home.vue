@@ -4,13 +4,15 @@
   <router-link to="/news/create" class="create-news-link">Criar notícia</router-link>
   
   <div class="news-container">
-    <ul>
+    <ul v-if="news.length" class="news-grid">
       <li v-for="post in news" :key="post.id" class="news-item">
         <div class="news-content">
-          <img :src="post.image" v-if="post.image" :alt="post.title">
-          <h2>{{ post.title }}</h2>
-          <p>{{ post.content }}</p>
-          <small>Posted {{ formatDate(post.created_at) }}</small>
+          <img :src="post.image" v-if="post.image" :alt="post.title" class="news-image">
+          <div class="news-text">
+            <h2>{{ post.title }}</h2>
+            <p>{{ post.content }}</p>
+            <small>Posted {{ formatDate(post.created_at) }}</small>
+          </div>
         </div>
         <div class="news-actions">
           <button @click="editPost(post)" class="edit-button">Edit</button>
@@ -18,6 +20,10 @@
         </div>
       </li>
     </ul>
+    <div v-else class="empty-news">
+      <img :src="emptyImg" alt="empty">
+      <p>No news available at the moment. Please check back later!</p>
+    </div>
   </div>
 
   <EditNewsModal 
@@ -45,10 +51,16 @@ const selectNewsItem = ref(null);
 
 const toast = useToast();
 
+const getImgEmptyUrl = () => {
+  const domain = `${window.location.protocol}//${window.location.hostname}${window.location.port ? `:${window.location.port}` : ''}`
+  return `${domain}/storage/img-setup/empty-box.png`;
+}
+
+const emptyImg = getImgEmptyUrl();
+console.log("emptyImg", emptyImg);
+
 // Get News
 onMounted(() => newsStore.getNews());
-
-console.log('news', news);
 
 // Format date to show the time passed since the post was created
 const formatDate = (date) => {
@@ -61,24 +73,25 @@ const editPost = (news) => {
 }
 
 const updateNews = async (newsData) => {
-  console.log("Dados enviados para updateNews:", newsData);
-  await newsStore.updateNews(newsData);
+  const response = await newsStore.updateNews(newsData);
+  if(response) {
+    toast.success('News updated successfully!');
+  }else {
+    toast.error('Error updating news!');
+  }
   isEditing.value = false;
 }
 
 const deletePost = async (id) => {
-  console.log(`Delete post with id: ${id}`);
   const isDelete = await newsStore.deleteNews(id);
-  toast.success('Notícia deletada com sucesso!') ? isDelete : toast.error('Erro ao deletar notícia!');
-  // Adicionar as notificacoes com o useToast().success('Notícia deletada com sucesso!');
+  toast.success('News successfully deleted!') ? isDelete : toast.error('Error deleting news!');
 }
-
 
 </script>
 
 <style scoped>
   .news-container {
-    position: relative;
+    width: 100%;
     padding: 20px;
   }
 
@@ -109,14 +122,22 @@ const deletePost = async (id) => {
     padding: 0;
   }
 
+  .news-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+  }
+
   .news-item {
-    background-color: #ecf0f1;
-    margin: 20px 0;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    transition: transform 0.2s;
-    position: relative;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    overflow: hidden;
+    background-color: #fff;
   }
 
   .news-item:hover {
@@ -124,15 +145,27 @@ const deletePost = async (id) => {
   }
 
   .news-content {
+    flex: 1;
     display: flex;
     flex-direction: column;
   }
 
+  .news-image {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+  }
+  
+  .news-text {
+    padding: 15px;
+    flex: 1;
+  }
+
   .news-actions {
-    position: absolute;
-    bottom: 10px;
-    right: 10px;
-    display: none;
+    padding: 15px;
+    display: flex;
+    justify-content: space-between;
+    border-top: 1px solid #ddd;
   }
 
   .news-item:hover .news-actions {
@@ -141,17 +174,16 @@ const deletePost = async (id) => {
   }
 
   .edit-button, .delete-button {
-    background-color: #3498db;
+    background-color: #007bff;
     color: #fff;
     border: none;
-    padding: 10px;
-    border-radius: 5px;
+    padding: 8px 12px;
+    border-radius: 4px;
     cursor: pointer;
-    transition: background-color 0.2s;
   }
 
-  .edit-button:hover {
-    background-color: #2980b9;
+  .edit-button:hover, .delete-button:hover {
+    background-color: #0056b3;
   }
 
   .delete-button {
@@ -160,6 +192,12 @@ const deletePost = async (id) => {
 
   .delete-button:hover {
     background-color: #c0392b;
+  }
+
+  .empty-news {
+    text-align: center;
+    color: #7f8c8d;
+    margin-top: 20px;
   }
 
   h2 {

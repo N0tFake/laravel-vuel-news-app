@@ -40,18 +40,23 @@ export const useNewsStore = defineStore('news', {
         }
 
         console.log("data", formData);
-
         const response = await axios.post('/news', formData, {
           headers: {
             'Content-Type': 'multipart/form-data'
           }
         });
 
+        if (response.status != 201) {
+          console.log("error", response.status);
+          return false;
+        }
+
         console.log("response", response);
+        return true;
 
       } catch (error) {
         this.error = error;
-
+        return false;
       }
     },
 
@@ -67,15 +72,25 @@ export const useNewsStore = defineStore('news', {
         // if (data.image) {
         //   formData.append('image', data.image);
         // }
+        const response = await axios.put(`/news/${data.id}`, formData, {
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
 
-
-        const response = await axios.put(`/news/${data.id}`, formData);
-
-        console.log("response", response);
+        if (response.status != 200) {
+          console.log("error", response.status);
+          return false;
+        }
+        
         this.getNews();
+        return true
+       
 
       } catch (error) {
         this.error = error;
+
+        return false;
       }
     },
 
@@ -83,8 +98,11 @@ export const useNewsStore = defineStore('news', {
       try {
         await axios.delete(`/news/${id}`);
         this.getNews();
+        return true;
       } catch (error) {
         this.error = error;
+        commit('setError', error);
+        return false;
       }
     }
   }

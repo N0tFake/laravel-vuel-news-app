@@ -82,31 +82,33 @@ class NewsController extends Controller
         try {
             $notice = News::findOrFail($id);
 
+            // throw new \Exception("Erro forçado para teste", 500);
+
             $request->validate([
                 'title' => 'required',
                 'content' => 'required',
-                'image' => 'nullable|image|max:2048',
+                // 'image' => 'nullable|image|max:2048',
             ]);
 
-            $path = $notice->image;
-            if ($request->hasFile('image')) {
-                if ($path) {
-                    Storage::disk('public')->delete($path);
-                }
+            // $path = $notice->image;
+            // if ($request->hasFile('image')) {
+            //     if ($path) {
+            //         Storage::disk('public')->delete($path);
+            //     }
 
-                $path = $request->file('image')->store('images', 'public');
-            }
+            //     $path = $request->file('image')->store('images', 'public');
+            // }
 
             $notice->update([
                 'title' => $request->title,
                 'content' => $request->content,
-                'image' => $path,
+                // 'image' => $path,
             ]);
 
             return response()->json(['success' => true, 'news' => $notice], 200);
 
         } catch (\Exception $e) {
-            return response()->json(['Error' => true, 'message' => $e->getMessage()]);
+            return response()->json(['Error' => true, 'message' => $e->getMessage()], $e->getCode());
         }
     }
 
