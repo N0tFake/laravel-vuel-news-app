@@ -4,7 +4,7 @@
   <router-link to="/news/create" class="create-news-link">Criar notícia</router-link>
   
   <div class="news-container">
-    <ul>
+    <ul v-if="news.length">
       <li v-for="post in news" :key="post.id" class="news-item">
         <div class="news-content">
           <img :src="post.image" v-if="post.image" :alt="post.title">
@@ -18,6 +18,10 @@
         </div>
       </li>
     </ul>
+    <div v-else class="empty-news">
+      <img :src="emptyImg" alt="empty">
+      <p>No news available at moment. Please check back later!</p>
+    </div>
   </div>
 
   <EditNewsModal 
@@ -42,10 +46,16 @@ const newsStore = useNewsStore();
 const isEditing = ref(false);
 const selectNewsItem = ref(null);
 
+const getImgEmptyUrl = () => {
+  const domain = `${window.location.protocol}//${window.location.hostname}${window.location.port ? `:${window.location.port}` : ''}`
+  return `${domain}/storage/img-setup/empty-box.png`;
+}
+
+const emptyImg = getImgEmptyUrl();
+console.log("emptyImg", emptyImg);
+
 // Get News
 onMounted(() => newsStore.getNews());
-
-console.log('news', news);
 
 // Format date to show the time passed since the post was created
 const formatDate = (date) => {
@@ -68,7 +78,6 @@ const deletePost = async (id) => {
   await newsStore.deleteNews(id);
   // Adicionar as notificacoes com o useToast().success('Notícia deletada com sucesso!');
 }
-
 
 </script>
 
@@ -156,6 +165,12 @@ const deletePost = async (id) => {
 
   .delete-button:hover {
     background-color: #c0392b;
+  }
+
+  .empty-news {
+    text-align: center;
+    color: #7f8c8d;
+    margin-top: 20px;
   }
 
   h2 {
